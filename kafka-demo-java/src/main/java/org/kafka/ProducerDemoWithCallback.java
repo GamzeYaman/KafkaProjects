@@ -11,7 +11,7 @@ import java.util.Properties;
 
 public class ProducerDemoWithCallback {
     private static final Logger log = LoggerFactory.getLogger(ProducerDemoWithCallback.class.getSimpleName());
-    private static String topicName = "SECOND_TOPIC";
+    private static String topicName = "THIRD_TOPIC";
 
     public static void main(String[] args) {
         log.info("I am Kafka Producer :)");
@@ -25,9 +25,17 @@ public class ProducerDemoWithCallback {
 
         String members[] = {"Kim Namjoon", "Kim Seokjin", "Min Yoongi", "Jung Hoseok", "Park Jimin", "Kim Taehyung", "Jeon Jungkook"};
         String message;
-        for (int i = 0; i < members.length; i++){
-            message = members[i];
-            sendMessageToKafka(producer, message);
+
+        for(int j = 0; j < 3; j++){
+            for (int i = 0; i < members.length; i++){
+                message = members[i];
+                sendMessageToKafka(producer, message);
+            }
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         producer.flush();
