@@ -52,11 +52,7 @@ public class ConsumerDemoWithShutdown {
             consumer.subscribe(Arrays.asList(topicName));
 
             while (true) {
-                log.info("Messages are being pulled");
-
                 ConsumerRecords<String, String> recordList = consumer.poll(Duration.ofMillis(2000));
-                log.info("Messages were pulled");
-
                 String polledMessage;
                 for(ConsumerRecord<String, String> record: recordList){
                     polledMessage = record.value().toUpperCase();
