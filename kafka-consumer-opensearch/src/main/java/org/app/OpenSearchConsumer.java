@@ -12,6 +12,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.opensearch.action.bulk.BulkRequest;
+import org.opensearch.action.bulk.BulkResponse;
 import org.opensearch.action.index.IndexRequest;
 import org.opensearch.action.index.IndexResponse;
 import org.opensearch.client.RequestOptions;
@@ -117,6 +119,8 @@ public class OpenSearchConsumer {
                 int recordCount = records.count();
                 log.info("Received " + recordCount + " records");
 
+                BulkRequest bulkRequest = new BulkRequest();
+
                 for(ConsumerRecord<String, String> record : records) {
 
                     //Idempotence Strategy 1 : Define an ID using Kafka Record coordinates
@@ -130,16 +134,27 @@ public class OpenSearchConsumer {
                             .source(record.value(), XContentType.JSON)
                             .id(id);
 
-                    IndexResponse response = openSearchClient.index(indexRequest, RequestOptions.DEFAULT);
+                  //  IndexResponse response = openSearchClient.index(indexRequest, RequestOptions.DEFAULT);
 
-                    log.info(response.getId());
+                    bulkRequest.add(indexRequest);
+
                 }
+                if(bulkRequest.numberOfActions() > 0){
+                    BulkResponse response = openSearchClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+                    log.info("Inserted " + response.getItems().length + " record(s)");
 
+                    try{
+                        Thread.sleep(1000);
+                    }catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
         } catch (Exception e) {
 
         }
+
 
 
         //Kafka Client
